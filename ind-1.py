@@ -1,188 +1,129 @@
-#!/usr/bin/env python3
+# !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import argparse
-import json
-import os.path
+
 import sys
-from datetime import date
-import click
+import json
 
-click.echo(click.style("hello", fg="green"))
+spisok_new = []
 
-def add_student(staff, name, course, year):
-    
-    staff.append(
-        {
-            "name": name,
-            "course": course,
-            "year": year
-        }
+
+def table():
+    line = '+-{}-+-{}-+-{}-+-{}-+'.format(
+        '-' * 6,
+        '-' * 20,
+        '-' * 30,
+        '-' * 20
     )
-    return staff
+    return line
 
-def display_students(staff):
 
-    #Отобразить список студентов.
+def table_name():
+    post = '| {:^6} | {:^20} | {:^30} | {:^20} | '.format(
+        "№",
+        "пункт назначения",
+        "номер",
+        "время"
+    )
+    return post
 
-    
-    if staff:
-            # Заголовок таблицы.
-        line = '+-{}-+-{}-+-{}-+-{}-+'.format(
-            '-' * 4,
-            '-' * 30,
-            '-' * 8,
-            '-' * 20
-        )
 
-        print(line)
-        print(
-            '| {:^4} | {:^30} | {:^8} | {:^20} |'.format(
-                "No",
-                "Ф.И.О.",
-                "Курс",
-                "Год поступления"
+def table_name_fil(names):
+    post = []
+    for idx_new, spisok_new_new in enumerate(names, 1):
+        post.append(
+            '| {:>6} | {:<20} | {:<30} | {:<20} | '.format(
+                idx_new,
+                spisok_new_new.get('name', ''),
+                spisok_new_new.get('namber', ''),
+                spisok_new_new.get('time', '')
             )
         )
-        print(line)
-        
-        for idx,student in enumerate(staff, 1):
-            print(
-                '| {:>4} | {:<30} | {:^8} | {:^20} |'.format(
-                    idx,
-                    student.get('name', ''),
-                    student.get('course', ''),
-                    student.get('year', 0)
-                )
-            )
-            print(line)
-    else:
-        print("Список студентов пуст.")
+    return post
 
-def select_students(staff, period):
-        """
-        Выбрать работников с заданным стажем.
-        """
-        # Получить текущую дату.
-        today = date.today()
-        # Сформировать список студентов
-        result = []
-        for employee in staff:
-            if today.year - employee.get('year', today.year) >= period:
-                result.append(employee)
-            # Возвратить список выбранных студентов.
-            return result
 
-def save_students(file_name, staff):
-        """
-        Сохранить всех работников в файл JSON.
-        """
-        # Открыть файл с заданным именем для записи.
-        with open(file_name, "w", encoding="utf-8") as fout:
-        # Выполнить сериализацию данных в формат JSON.
-        # Для поддержки кирилицы установим ensure_ascii=False
-            json.dump(staff, fout, ensure_ascii=False, indent=4)
+def save_list_shop(file_name, staff):
+    with open(file_name, "w", encoding="utf-8") as fout:
+        json.dump(staff, fout, ensure_ascii=False, indent=4)
 
-def load_students(file_name):
-        """
-        Загрузить всех работников из файла JSON.
 
-        """
-        
-        with open(file_name, "r", encoding="utf-8") as fin:
-            return json.load(fin)
+def load_list_shop(file_name):
+    with open(file_name, "r", encoding="utf-8") as fin:
+        return json.load(fin)
 
-def main(command_line=None):
-        
-    file_parser = argparse.ArgumentParser(add_help=False)
-    file_parser.add_argument(
-        "filename",
-        action="store",
-        help="The data file name"
-    )
-        
-    parser = argparse.ArgumentParser("students")
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="%(prog)s 0.1.0"
-    )
-    subparsers = parser.add_subparsers(dest="command")
-       
-    add = subparsers.add_parser(
-        "add",
-        parents=[file_parser],
-        help="Add a new student"
-    )
-    add.add_argument(
-        "-n",
-        "--name",
-        action="store",
-        required=True,
-        help="The stedent's name"
-    )
-    add.add_argument(
-        "-c",
-        "--course",
-        action="store",
-        help="The student's course"
-    )
-    add.add_argument(
-        "-y",
-        "--year",
-        action="store",
-        type=int,
-        required=True,
-        help="The year of hiring"
-    )
-       
-    _ = subparsers.add_parser(
-        "display",
-        parents=[file_parser],
-        help="Display all students"
 
-    )
-       
-    select = subparsers.add_parser(
-        "select",
-        parents=[file_parser],
-        help="Select the students"
-    )
-    select.add_argument(
-        "-P",
-        "--period",
-        action="store",
-        type=int,
-        required=True,
-        help="The required period"
-    )
-       
-    args = parser.parse_args(command_line)
-           
-    is_dirty = False
-    if os.path.exists(args.filename):
-        students = load_students(args.filename)
-    else:
-        students = []
-            # Добавить студента.
-    if args.command == "add":
-        students = add_student(
-        students,
-        args.name,
-        args.course,
-        args.year
-    )
-        is_dirty = True
-           
-    elif args.command == "display":
-            display_students(students)
+def main():
+    list_shop = []
 
-           
-    elif args.command == "select":
-        selected = select_students(students, args.period)
-        display_students(selected)
-           
-    if is_dirty:
-            save_students(args.filename, students)
+    while True:
+        command = input('>>> ').lower()
 
-if __name__ == "__main__":
+        if command == 'exit':
+            break
+
+        elif command == 'add':
+            name = input('Пункт назначения: ')
+            namber = input('Номер поезда: ')
+            time = input('время: ')
+
+            list_shop_new = {
+                'name': name,
+                'namber': namber,
+                'time': time
+            }
+
+            list_shop.append(list_shop_new)
+
+            if len(list_shop) > 1:
+                list_shop.sort(key=lambda item: item.get('name_shop', ''))
+
+        elif command == 'list':
+            print(table())
+            print(table_name())
+            print(table())
+            for item_n in table_name_fil(list_shop):
+                print(item_n)
+            print(table())
+
+        elif command == 'product':
+            shop_sear = input('Введите пункт назначения: ')
+            search_shop = []
+            for shop_sear_itme in list_shop:
+                if shop_sear == shop_sear_itme['name']:
+                    search_shop.append(shop_sear_itme)
+
+            if len(search_shop) > 0:
+                print(table())
+                print(table_name())
+                print(table())
+                for item_f in table_name_fil(search_shop):
+                    print(item_f)
+                print(table())
+            else:
+                print('Такого рейса нет', file=sys.stderr)
+
+        elif command.startswith("save "):
+            parts = command.split(maxsplit=1)
+            file_name = parts[1]
+            save_list_shop(file_name, list_shop)
+
+        elif command.startswith("load "):
+            parts = command.split(maxsplit=1)
+            file_name = parts[1]
+            list_shop = load_list_shop(file_name)
+
+        elif command == 'help':
+            print('Список команд:\n')
+            print('add - добавить магазин.')
+            print('list - вывести список магазинов.')
+            print('product <Название> - запросить информацию о товаре.')
+            print('help - Справочник.')
+            print("load <Название файла без скобок> - загрузить данные из файла;")
+            print("save <Название файла без скобок> - сохранить данные в файл;")
+            print('exit - Завершить пработу программы.')
+        else:
+            print(f'Команда <{command}> не существует.', file=sys.stderr)
+            print('Введите <help> для просмотра доступных команд')
+
+
+if __name__ == '__main__':
     main()
